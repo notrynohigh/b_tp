@@ -13,6 +13,13 @@ typedef enum
 
 #define B_TP_PACKET_HEAD_LEN        (sizeof(b_tp_head_t))
 
+#if B_TP_CHECK_TYPE == B_TP_SUM
+#define B_TP_CHECK_LEN     1
+#elif B_TP_CHECK_TYPE == B_TP_CRC16
+#define B_TP_CHECK_LEN     2
+#else
+#define B_TP_CHECK_LEN     4
+#endif
 
 typedef enum
 {
@@ -20,54 +27,52 @@ typedef enum
 	STA_PACKING,
 }b_tp_status_t;
 
+typedef enum
+{
+    B_TP_SUCCESS,
+	B_TP_MEM_ERR,
+	B_TP_OTHER_ERR
+}b_tp_err_code_t;
+
+
 #pragma pack(1)
 
 typedef struct
 {
     b_tp_head_t head;
-<<<<<<< HEAD
-	b_TPU8 *pbuf;
-#if (B_TP_CHECK_TYPE == B_TP_SUM)
-    b_TPU8  crc;
-#elif (B_TP_CHECK_TYPE == B_TP_CRC16)
-    b_TPU16 crc;
-#else
-    b_TPU32 crc;
-#endif
-	uint8_t     buf[1];
+	b_TPU8      buf[1];
 }b_tp_pack_info_t;
 
 typedef struct
 {
-    uint8_t     number;
-	uint8_t     buf[1];
+    B_TP_FRAME_NUMBER_TYPE     number;
+	b_TPU8                     buf[1];
 }b_tp_unpack_info_t;
 
 typedef struct
 {
-    uint8_t            c_packet_number;
-	uint16_t           total_len;
-	uint16_t           rec_len;
-	b_tp_pack_info_t   *pbuf;
-	b_tp_status_t      status;
+    B_TP_TOTAL_LEN_TYPE   c_packet_number;
+	B_TP_TOTAL_LEN_TYPE   total_len;
+	B_TP_TOTAL_LEN_TYPE   rec_len;
+	b_tp_pack_info_t      *pbuf;
+	b_tp_status_t         status;
 }b_tp_rec_info_t;
 
 #pragma pack()
 
-void b_tp_receive_data(uint8_t *pbuf, uint32_t len);
+void b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len);
 
-void b_tp_send_data(uint8_t *pbuf, uint32_t len);
-
-
+void b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len);
 
 
 
 
 
-<<<<<<< HEAD
+
+
+
 #endif
-=======
->>>>>>> origin/test_interface
+
 
 
 

@@ -1,11 +1,6 @@
+#include "b_tp.h"
+#include "string.h"
 
-
-
-#define HEAD_FLAG        88
-
-#define B_TP_HEAD_LEN    sizeof(b_tp_head_t)
-
-#define B_TP_MTU         20
 
 static b_tp_rec_info_t  gs_b_tp_rec_info = 
 {
@@ -14,10 +9,10 @@ static b_tp_rec_info_t  gs_b_tp_rec_info =
 
 
 
-static void _b_tp_analyse_single_packet(uint8_t *pbuf, uint32_t len)
+static void _b_tp_analyse_single_packet(b_TPU8 *pbuf, b_TPU32 len)
 {
     b_tp_pack_info_t *pb_tp_pack_info = (b_tp_pack_info_t *)pbuf;
-    uint8_t *p = NULL;
+    b_TPU8 *p = NULL;
 	if(B_TP_SUCCESS != _b_tp_check_data(pb_tp_pack_info))
 	{
         return;
@@ -31,10 +26,10 @@ static void _b_tp_analyse_single_packet(uint8_t *pbuf, uint32_t len)
 	// ?   add callback
 }
 
-static void _b_tp_collect_packet(uint8_t *pbuf, uint32_t len)
+static void _b_tp_collect_packet(b_TPU8 *pbuf, b_TPU32 len)
 {
     b_tp_unpack_info_t *pb_tp_unpack_info = (b_tp_unpack_info_t *)pbuf;
-	uint8_t *p = NULL;
+	b_TPU8 *p = NULL;
 	if(pb_tp_unpack_info->number != (gs_b_tp_rec_info.c_packet_number + 1))
 	{
         gs_b_tp_rec_info.status = STA_WAIT_HEAD;
@@ -61,32 +56,32 @@ static void _b_tp_collect_packet(uint8_t *pbuf, uint32_t len)
 }
 
 
-static void _b_tp_wait_first_packet(uint8_t *pbuf, uint32_t len)
+static void _b_tp_wait_first_packet(b_TPU8 *pbuf, b_TPU32 len)
 {
     b_tp_head_t *pb_tp_head = (b_tp_head_t *)pbuf;
     
-    if(pb_tp_head->head != HEAD_FLAG || pb_tp_head->total_len <= B_TP_HEAD_LEN)
+    if(pb_tp_head->head != B_TP_HEAD || pb_tp_head->total_len <= B_TP_PACKET_HEAD_LEN)
     {
         return;
     }
-    if(pb_tp_head->flag != 0 && pb_tp_head->total_len <= (B_TP_MTU - B_TP_HEAD_LEN))
+    if(pb_tp_head->f_num != 0 && pb_tp_head->total_len <= (B_TP_MTU - B_TP_PACKET_HEAD_LEN))
     {
         return;
     }
 	
-    if(pb_tp_head->flag == 0x1)
+    if(pb_tp_head->f_num == 0x1)
     {  
-	    gs_b_tp_rec_info.total_len = pb_tp_head->total_len + CHECK_LEN;
-	    gs_b_tp_rec_info.pbuf = (b_tp_pack_info_t *)malloc(pb_tp_head->total_len + B_TP_HEAD_LEN + CHECK_LEN);
+	    gs_b_tp_rec_info.total_len = pb_tp_head->total_len + B_TP_CHECK_LEN;
+	    gs_b_tp_rec_info.pbuf = (b_tp_pack_info_t *)malloc(pb_tp_head->total_len + B_TP_PACKET_HEAD_LEN + B_TP_CHECK_LEN);
 	    if(NULL == gs_b_tp_rec_info.pbuf)
 	    {
             return;
 	    }
-	    memcpy(&(gs_b_tp_rec_info.pbuf->head), pbuf, B_TP_HEAD_LEN);
-	    memcpy(gs_b_tp_rec_info.pbuf->buf, pbuf + B_TP_HEAD_LEN, len - B_TP_HEAD_LEN);
+	    memcpy(&(gs_b_tp_rec_info.pbuf->head), pbuf, B_TP_PACKET_HEAD_LEN);
+	    memcpy(gs_b_tp_rec_info.pbuf->buf, pbuf + B_TP_PACKET_HEAD_LEN, len - B_TP_PACKET_HEAD_LEN);
 	    gs_b_tp_rec_info.status = STA_PACKING;
 	    gs_b_tp_rec_info.c_packet_number = 1;
-		gs_b_tp_rec_info.rec_len = len - B_TP_HEAD_LEN;
+		gs_b_tp_rec_info.rec_len = len - B_TP_PACKET_HEAD_LEN;
     }
     else
     {
@@ -97,7 +92,7 @@ static void _b_tp_wait_first_packet(uint8_t *pbuf, uint32_t len)
 
 
 
-void b_tp_receive_data(uint8_t *pbuf, uint32_t len)
+void b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len)
 {
     b_tp_head_t  *pb_tp_head = NULL;
     if(pbuf == NULL || len == 0)
@@ -115,27 +110,27 @@ void b_tp_receive_data(uint8_t *pbuf, uint32_t len)
 }
 
 
-void b_tp_send_data(uint8_t *pbuf, uint32_t len)
+void b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len)
 {
     b_tp_pack_info_t *pb_tp_pack_info = NULL;
     if(pbuf == NULL && len == 0)
     {
         return;
 	}
-	pb_tp_pack_info = (b_tp_pack_info_t *)malloc(len + CHECK_LEN + B_TP_HEAD_LEN);
+	pb_tp_pack_info = (b_tp_pack_info_t *)malloc(len + B_TP_CHECK_LEN + B_TP_PACKET_HEAD_LEN);
 	if(pb_tp_pack_info == NULL)
 	{
         return;
 	}
-	pb_tp_pack_info.head.head = HEAD_FLAG;
-	pb_tp_pack_info.head.total_len = len;	
-	if((len + CHECK_LEN + B_TP_HEAD_LEN) > B_TP_MTU)
+	pb_tp_pack_info->head.head = B_TP_HEAD;
+	pb_tp_pack_info->head.total_len = len;	
+	if((len + B_TP_CHECK_LEN + B_TP_PACKET_HEAD_LEN) > B_TP_MTU)
 	{
-        pb_tp_pack_info.head.flag = 0X1;
+        pb_tp_pack_info->head.f_num = 0X1;
 	}
 	else
 	{
-        pb_tp_pack_info.head.flag = 0X0;
+        pb_tp_pack_info->head.f_num = 0X0;
 	}	
     memcpy(pb_tp_pack_info.buf, pbuf, len);
     _b_tp_create_check_code(pb_tp_pack_info);	
