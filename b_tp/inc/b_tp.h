@@ -43,7 +43,7 @@ typedef struct
 
 void b_tp_receive_data(uint8_t *pbuf, uint32_t len);
 
-int b_tp_send_data(uint8_t *pbuf, uint32_t len);
+void b_tp_send_data(uint8_t *pbuf, uint32_t len);
 
 
 

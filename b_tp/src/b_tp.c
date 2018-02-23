@@ -115,16 +115,31 @@ void b_tp_receive_data(uint8_t *pbuf, uint32_t len)
 }
 
 
-int b_tp_send_data(uint8_t *pbuf, uint32_t len)
+void b_tp_send_data(uint8_t *pbuf, uint32_t len)
 {
+    b_tp_pack_info_t *pb_tp_pack_info = NULL;
     if(pbuf == NULL && len == 0)
     {
         return;
 	}
-	if((len + CHECK_LEN + B_TP_HEAD_LEN)
+	pb_tp_pack_info = (b_tp_pack_info_t *)malloc(len + CHECK_LEN + B_TP_HEAD_LEN);
+	if(pb_tp_pack_info == NULL)
 	{
-        
+        return;
 	}
+	pb_tp_pack_info.head.head = HEAD_FLAG;
+	pb_tp_pack_info.head.total_len = len;	
+	if((len + CHECK_LEN + B_TP_HEAD_LEN) > B_TP_MTU)
+	{
+        pb_tp_pack_info.head.flag = 0X1;
+	}
+	else
+	{
+        pb_tp_pack_info.head.flag = 0X0;
+	}	
+    memcpy(pb_tp_pack_info.buf, pbuf, len);
+    _b_tp_create_check_code(pb_tp_pack_info);	
+    _b_tp_unpack_send(pb_tp_pack_info);	
 }
 
 
