@@ -1,6 +1,15 @@
 #include "b_tp.h"
 #include "string.h"
 
+#if (B_TP_CHECK_SELECT == B_TP_SUM)
+#include "sum_8bit.h"
+#elif (B_TP_CHECK_SELECT == B_TP_CRC16)
+#include "crc16.h"
+#else
+#include "crc32.h"
+#endif
+
+
 static pb_tp_callback_t gps_rec_success_cb = b_TP_NULL;
 
 static b_tp_rec_info_t  gs_b_tp_rec_info = 
