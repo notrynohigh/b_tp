@@ -10,7 +10,7 @@
 
 
 
-uint16_t crc16(uint8_t *pbuf, uint32_t len);
+uint16_t crc16(uint8_t const *pbuf, uint32_t len);
 
 
 
