@@ -23,6 +23,8 @@ typedef unsigned int       b_TPU32;
 typedef signed char        b_TPS8;
 typedef signed short       b_TPS16;
 typedef signed int         b_TPS32;
+
+#define b_TP_NULL          ((void *)0)
 /**
  * @}
  */
@@ -33,7 +35,7 @@ typedef signed int         b_TPS32;
 #define B_TP_HEAD_TYPE            b_TPU8
 #define B_TP_FRAME_NUMBER_TYPE    b_TPU8
 #define B_TP_TOTAL_LEN_TYPE       b_TPU8
-#define B_TP_CHECK_TYPE           B_TP_CRC32         /**< @ref b_tp_checkout_t  */
+#define B_TP_CHECK_SELECT         B_TP_CRC32         /**< @ref b_tp_checkout_t  */
 
 
 #define B_TP_HEAD                 0XA5

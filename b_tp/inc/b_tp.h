@@ -13,12 +13,15 @@ typedef enum
 
 #define B_TP_PACKET_HEAD_LEN        (sizeof(b_tp_head_t))
 
-#if B_TP_CHECK_TYPE == B_TP_SUM
+#if B_TP_CHECK_SELECT == B_TP_SUM
 #define B_TP_CHECK_LEN     1
-#elif B_TP_CHECK_TYPE == B_TP_CRC16
+#define B_TP_CHECK_TYPE    b_TPU8
+#elif B_TP_CHECK_SELECT == B_TP_CRC16
 #define B_TP_CHECK_LEN     2
+#define B_TP_CHECK_TYPE    b_TPU16
 #else
 #define B_TP_CHECK_LEN     4
+#define B_TP_CHECK_TYPE    b_TPU32
 #endif
 
 typedef enum
@@ -31,8 +34,13 @@ typedef enum
 {
     B_TP_SUCCESS,
 	B_TP_MEM_ERR,
+	B_TP_CHECK_ERR,
 	B_TP_OTHER_ERR
 }b_tp_err_code_t;
+
+
+
+typedef void (*pb_tp_callback_t)(b_TPU8 *, b_TPU32);
 
 
 #pragma pack(1)
@@ -60,11 +68,12 @@ typedef struct
 
 #pragma pack()
 
-void b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len);
 
+
+void b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len);
 void b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len);
 
-
+void b_tp_reg_callback(pb_tp_callback_t pfunc);
 
 
 
