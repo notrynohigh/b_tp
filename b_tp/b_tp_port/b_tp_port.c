@@ -34,27 +34,22 @@
  * @{
  */
 
-#define TEST_REC      1
 
-#if TEST_REC 
 extern uint8_t  b_table[];
-extern uint32_t b_len = 0;
-#endif
+extern uint32_t b_len;
 
 
 int b_tp_port_send(uint8_t *pbuf, uint32_t len)
 {
-#if TEST_REC
+    uint32_t i = 0;
     memcpy(b_table + b_len, pbuf, len);
     b_len += len;        
-#else
-    uint32_t i = 0;
+
     for(i = 0;i < len;i++)
     {
-        printf("%x ", pbuf[i]);
+        printf("%d ", pbuf[i]);
     }
     printf("\n\r");
-#endif
     return len;
 }
 
