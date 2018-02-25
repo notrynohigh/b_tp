@@ -22,7 +22,8 @@
  *****************************************************************************
  */
 #include "b_tp_port.h"
-
+#include "stdio.h"
+#include "string.h"
 /**
  * @addtogroup B_TP
  * @{
@@ -33,10 +34,28 @@
  * @{
  */
 
+#define TEST_REC      1
+
+#if TEST_REC 
+extern uint8_t  b_table[];
+extern uint32_t b_len = 0;
+#endif
+
+
 int b_tp_port_send(uint8_t *pbuf, uint32_t len)
 {
-    // ... add code
-    return 0;
+#if TEST_REC
+    memcpy(b_table + b_len, pbuf, len);
+    b_len += len;        
+#else
+    uint32_t i = 0;
+    for(i = 0;i < len;i++)
+    {
+        printf("%x ", pbuf[i]);
+    }
+    printf("\n\r");
+#endif
+    return len;
 }
 
 
