@@ -25,19 +25,17 @@ void command_handle(uint8_t *pbuf, uint32_t len)
     free(pbuf);
 }
 
-b_TPS32 _b_tp_rec_check_head(b_tp_head_t *phead)
+b_tp_err_code_t _b_tp_rec_check_head(b_tp_head_t *phead)
 {
-//    printf("phead->number: %d number: %d",phead->number, number);
     if(phead->number == (number - 1))
     {
-        return 0;
+        return B_TP_SUCCESS;
     }
-    return -1;
+    return B_TP_HEAD_ERR;
 }
 
 void _b_tp_send_set_head(b_tp_head_t *phead)
 {
- //   printf("number: %d", number);
     phead->number = number++;
 }
 

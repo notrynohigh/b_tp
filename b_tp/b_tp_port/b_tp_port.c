@@ -22,6 +22,7 @@
  *****************************************************************************
  */
 #include "b_tp_port.h"
+#include "b_tp.h"
 #include "stdio.h"
 #include "string.h"
 /**
@@ -39,7 +40,7 @@ extern uint8_t  b_table[];
 extern uint32_t b_len;
 
 
-int b_tp_port_send(uint8_t *pbuf, uint32_t len)
+b_tp_err_code_t b_tp_port_send(uint8_t *pbuf, uint32_t len)
 {
     uint32_t i = 0;
     memcpy(b_table + b_len, pbuf, len);
@@ -50,7 +51,7 @@ int b_tp_port_send(uint8_t *pbuf, uint32_t len)
         printf("%d ", pbuf[i]);
     }
     printf("\n\r");
-    return len;
+    return B_TP_SUCCESS;
 }
 
 

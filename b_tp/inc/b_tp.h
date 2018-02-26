@@ -66,6 +66,9 @@ typedef enum
     B_TP_SUCCESS,
     B_TP_MEM_ERR,
     B_TP_CHECK_ERR,
+    B_TP_PARAM_ERR,
+    B_TP_HEAD_ERR,
+    B_TP_F_NUM_ERR,
     B_TP_OTHER_ERR
 }b_tp_err_code_t;
 
@@ -104,13 +107,13 @@ typedef struct
  * @{
  */
 
-void b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len);
-void b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len);
+b_tp_err_code_t b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len);
+b_tp_err_code_t b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len);
 
 void b_tp_reg_callback(pb_tp_callback_t pfunc);
 
 
-b_TPS32 _b_tp_rec_check_head(b_tp_head_t *);
+b_tp_err_code_t _b_tp_rec_check_head(b_tp_head_t *);
 void _b_tp_send_set_head(b_tp_head_t *);
 
 /**
