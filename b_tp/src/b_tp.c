@@ -147,6 +147,7 @@ static void _b_tp_collect_packet(b_TPU8 *pbuf, b_TPU32 len)
     {
         gs_b_tp_rec_info.status = STA_WAIT_HEAD;
         free(gs_b_tp_rec_info.pbuf);
+			  gs_b_tp_rec_info.pbuf = b_TP_NULL;
         return;
     }
     gs_b_tp_rec_info.c_packet_number++;
@@ -165,6 +166,7 @@ static void _b_tp_collect_packet(b_TPU8 *pbuf, b_TPU32 len)
         }  
         gs_b_tp_rec_info.status = STA_WAIT_HEAD;
         free(gs_b_tp_rec_info.pbuf);
+				gs_b_tp_rec_info.pbuf = b_TP_NULL;
     }
 }
 
@@ -301,6 +303,7 @@ void b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len)
         return;
     }
     _b_tp_unpack_send(pb_tp_pack_info);	
+		free(pb_tp_pack_info);
 }
 
 
@@ -327,5 +330,4 @@ void b_tp_reg_callback(pb_tp_callback_t pfunc)
 /**
  * @}
  */
-
 
