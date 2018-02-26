@@ -34,6 +34,12 @@
 #include "crc32.h"
 #endif
 
+#if 0
+#define WEAK_FUNC    __weak
+#else
+#define WEAK_FUNC    __attribute__((weak))
+#endif
+
 
 /**
  * @addtogroup B_TP
@@ -59,12 +65,12 @@ static b_tp_rec_info_t  gs_b_tp_rec_info =
  */
 
 
-__weak b_TPS32 _b_tp_rec_check_head(b_tp_head_t *phead)
+WEAK_FUNC b_TPS32 _b_tp_rec_check_head(b_tp_head_t *phead)
 {
     return 0;
 }
 
-__weak void _b_tp_send_set_head(b_tp_head_t *phead)
+WEAK_FUNC void _b_tp_send_set_head(b_tp_head_t *phead)
 {
     ;
 }
