@@ -56,6 +56,7 @@ static pb_tp_callback_t gps_rec_success_cb = b_TP_NULL;
 static b_tp_rec_info_t  gs_b_tp_rec_info = 
 {
     .status = STA_WAIT_HEAD,
+    .buf    = b_TP_NULL,
 };
 
 
@@ -121,6 +122,15 @@ static b_tp_err_code_t _b_tp_create_check_code(b_tp_pack_info_t *pb_tp_pack_info
     return B_TP_SUCCESS;
 }
 
+static void _b_tp_rec_reset()
+{
+    gs_b_tp_rec_info.status = STA_WAIT_HEAD;
+    if(gs_b_tp_rec_info.pbuf != b_TP_NULL)
+    {
+        free(gs_b_tp_rec_info.pbuf);
+        gs_b_tp_rec_info.pbuf = b_TP_NULL;
+    }
+}
 
 static b_tp_err_code_t _b_tp_analyse_single_packet(b_TPU8 *pbuf, b_TPU32 len)
 {
@@ -148,9 +158,7 @@ static b_tp_err_code_t _b_tp_collect_packet(b_TPU8 *pbuf, b_TPU32 len)
     b_tp_err_code_t err_code = B_TP_SUCCESS;    
     if(pb_tp_unpack_info->number != (gs_b_tp_rec_info.c_packet_number + 1))
     {
-        gs_b_tp_rec_info.status = STA_WAIT_HEAD;
-        free(gs_b_tp_rec_info.pbuf);
-        gs_b_tp_rec_info.pbuf = b_TP_NULL;
+        _b_tp_rec_reset();
         return B_TP_F_NUM_ERR;
     }
     gs_b_tp_rec_info.c_packet_number++;
@@ -176,9 +184,12 @@ static b_tp_err_code_t _b_tp_collect_packet(b_TPU8 *pbuf, b_TPU32 len)
         {
             err_code = B_TP_CHECK_ERR;
         }
-        gs_b_tp_rec_info.status = STA_WAIT_HEAD;
-        free(gs_b_tp_rec_info.pbuf);
-        gs_b_tp_rec_info.pbuf = b_TP_NULL;
+        _b_tp_rec_reset();
+    }
+    else if(gs_b_tp_rec_info.rec_len > gs_b_tp_rec_info.total_len)
+    {
+        _b_tp_rec_reset();
+        err_code = B_TP_OTHER_ERR;
     }
     return err_code;
 }
@@ -323,6 +334,7 @@ b_tp_err_code_t b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len)
     memcpy(pb_tp_pack_info->buf, pbuf, len);
     if(B_TP_SUCCESS != _b_tp_create_check_code(pb_tp_pack_info))
     {
+        free(pb_tp_pack_info);    
         return B_TP_CHECK_ERR;
     }
     err_code = _b_tp_unpack_send(pb_tp_pack_info);	
