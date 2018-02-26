@@ -22,7 +22,6 @@
  *****************************************************************************
  */
 #include "b_tp_port.h"
-#include "b_tp.h"
 #include "stdio.h"
 #include "string.h"
 /**

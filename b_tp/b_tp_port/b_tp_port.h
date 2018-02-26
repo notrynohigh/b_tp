@@ -25,7 +25,7 @@
 #define __B_TP_PORT_H__
 
 #include "stdint.h"
-
+#include "b_tp.h"
 /**
  * @addtogroup B_TP
  * @{
@@ -37,7 +37,7 @@
  */
 
 
-int b_tp_port_send(uint8_t *pbuf, uint32_t len);
+b_tp_err_code_t b_tp_port_send(uint8_t *pbuf, uint32_t len);
 
 
 /**
