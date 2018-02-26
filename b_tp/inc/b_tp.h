@@ -110,6 +110,8 @@ void b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len);
 void b_tp_reg_callback(pb_tp_callback_t pfunc);
 
 
+b_TPS32 _b_tp_rec_check_head(b_tp_head_t *);
+void _b_tp_send_set_head(b_tp_head_t *);
 
 /**
  * @}

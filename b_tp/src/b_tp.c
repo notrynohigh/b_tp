@@ -57,6 +57,18 @@ static b_tp_rec_info_t  gs_b_tp_rec_info =
  * @defgroup B_TP_PRIVATE_FUNC private functions
  * @{
  */
+
+
+__weak b_TPS32 _b_tp_rec_check_head(b_tp_head_t *phead)
+{
+    return 0;
+}
+
+__weak void _b_tp_send_set_head(b_tp_head_t *phead)
+{
+    ;
+}
+
  
 static b_tp_err_code_t _b_tp_check_data(b_tp_pack_info_t *pb_tp_pack_info)
 {
@@ -164,6 +176,11 @@ static void _b_tp_wait_first_packet(b_TPU8 *pbuf, b_TPU32 len)
         return;
     }
 
+    if(_b_tp_rec_check_head(pb_tp_head) != 0)
+    {
+        return;
+    }
+    
     if(pb_tp_head->f_num == 0x1)
     {  
         gs_b_tp_rec_info.total_len = pb_tp_head->total_len + B_TP_CHECK_LEN;
@@ -184,15 +201,8 @@ static void _b_tp_wait_first_packet(b_TPU8 *pbuf, b_TPU32 len)
     }
 }
 
-/**
- * @}
- */
 
 
-/**
- * @defgroup B_TP_PUBLIC_FUNC public functions
- * @{
- */
 static void _b_tp_unpack_send(b_tp_pack_info_t *pb_tp_pack_info)
 {
     b_TPU32 len, send_len = 0;
@@ -228,11 +238,16 @@ static void _b_tp_unpack_send(b_tp_pack_info_t *pb_tp_pack_info)
     }
 }
 
+/**
+ * @}
+ */
 
 
 
-
-
+/**
+ * @defgroup B_TP_PUBLIC_FUNC public functions
+ * @{
+ */
 
 void b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len)
 {
@@ -263,6 +278,7 @@ void b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len)
     {
         return;
     }
+    _b_tp_send_set_head(&(pb_tp_pack_info->head));
     pb_tp_pack_info->head.head = B_TP_HEAD;
     pb_tp_pack_info->head.total_len = len;	
     if((len + B_TP_CHECK_LEN + B_TP_PACKET_HEAD_LEN) > B_TP_MTU)
