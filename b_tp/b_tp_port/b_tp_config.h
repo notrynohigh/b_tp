@@ -70,8 +70,9 @@ typedef signed int         b_TPS32;
 typedef struct
 {
   B_TP_HEAD_TYPE          head;
-	B_TP_FRAME_NUMBER_TYPE  f_num;
-	B_TP_TOTAL_LEN_TYPE     total_len;
+  B_TP_FRAME_NUMBER_TYPE  f_num;
+  b_TPU8                  number;
+  B_TP_TOTAL_LEN_TYPE     total_len;
 }b_tp_head_t;
 
 #pragma pack()

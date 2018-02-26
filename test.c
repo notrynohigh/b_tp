@@ -11,6 +11,7 @@
 uint8_t  b_table[BUF_LEN];
 uint32_t b_len = 0;
 
+uint8_t  number = 0;
 
 void command_handle(uint8_t *pbuf, uint32_t len)
 {
@@ -24,7 +25,21 @@ void command_handle(uint8_t *pbuf, uint32_t len)
     free(pbuf);
 }
 
+b_TPS32 _b_tp_rec_check_head(b_tp_head_t *phead)
+{
+//    printf("phead->number: %d number: %d",phead->number, number);
+    if(phead->number == (number - 1))
+    {
+        return 0;
+    }
+    return -1;
+}
 
+void _b_tp_send_set_head(b_tp_head_t *phead)
+{
+ //   printf("number: %d", number);
+    phead->number = number++;
+}
 
 void main()
 {

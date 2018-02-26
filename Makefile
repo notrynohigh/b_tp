@@ -8,4 +8,4 @@ TEST: $(OBJ)
 	gcc $(DEF) $(INCLUDE) -c $< -o $@
 
 clean:
-	rm -rf *.o TEST 
+	rm -rf *.o TEST ./b_tp/src/*.o ./b_tp/b_tp_port/*.o ./b_tp/check/crc16/*.o
