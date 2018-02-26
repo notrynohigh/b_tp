@@ -67,7 +67,7 @@ void main()
         {
             b_tp_receive_data(&(b_table[i * B_TP_MTU]), b_len - (i * B_TP_MTU)); 
         }
-        sleep(5);
+        sleep(1);
     }
 }
 

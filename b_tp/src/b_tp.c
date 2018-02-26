@@ -56,7 +56,7 @@ static pb_tp_callback_t gps_rec_success_cb = b_TP_NULL;
 static b_tp_rec_info_t  gs_b_tp_rec_info = 
 {
     .status = STA_WAIT_HEAD,
-    .buf    = b_TP_NULL,
+    .pbuf    = b_TP_NULL,
 };
 
 
