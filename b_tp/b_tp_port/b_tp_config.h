@@ -63,6 +63,10 @@ typedef signed int         b_TPS32;
 
 #define B_TP_HEAD                 0XA5
 #define B_TP_MTU                  20
+
+
+#define B_TP_STATIC_BUF_ENABLE    1
+#define B_TP_STATIC_BUF_LEN       160
 /** configure end ---------------------------------------------*/
 
 #pragma pack(1)
