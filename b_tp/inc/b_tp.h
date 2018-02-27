@@ -69,6 +69,7 @@ typedef enum
     B_TP_PARAM_ERR,
     B_TP_HEAD_ERR,
     B_TP_F_NUM_ERR,
+    B_TP_BUSY,
     B_TP_OTHER_ERR
 }b_tp_err_code_t;
 
