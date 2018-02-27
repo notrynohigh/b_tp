@@ -42,6 +42,11 @@
 
 #if B_TP_STATIC_BUF_ENABLE
 static b_TPU8 sg_b_tp_buf[B_TP_STATIC_BUF_LEN];
+
+#ifdef B_TP_STATIC_REC_BUF_LEN
+static b_TPU8 sg_b_tp_rec_buf[B_TP_STATIC_REC_BUF_LEN];
+#endif
+
 #endif
 
 typedef enum
@@ -89,7 +94,9 @@ WEAK_FUNC void _b_tp_send_set_head(b_tp_head_t *phead)
 
 static void _b_tp_send_lock()
 {
+#if B_TP_SEND_LOCK_ENABLE
     sg_send_lock_flag = B_TP_LOCK;
+#endif
 }
 
 static void _b_tp_send_unlock()
@@ -172,7 +179,11 @@ static b_tp_err_code_t _b_tp_analyse_single_packet(b_TPU8 *pbuf, b_TPU32 len)
         return B_TP_CHECK_ERR;
     }
 #if B_TP_STATIC_BUF_ENABLE
-    p = sg_b_tp_buf;
+#if B_TP_SEND_LOCK_ENABLE
+        p = sg_b_tp_buf;
+#else
+        p = sg_b_tp_rec_buf;
+#endif 
 #else   
     p = malloc(pb_tp_pack_info->head.total_len);
     if(b_TP_NULL == p)
@@ -254,7 +265,11 @@ static b_tp_err_code_t _b_tp_wait_first_packet(b_TPU8 *pbuf, b_TPU32 len)
     {  
         gs_b_tp_rec_info.total_len = pb_tp_head->total_len + B_TP_CHECK_LEN;
 #if B_TP_STATIC_BUF_ENABLE
+#if B_TP_SEND_LOCK_ENABLE
         gs_b_tp_rec_info.pbuf = (b_tp_pack_info_t *)sg_b_tp_buf;
+#else
+        gs_b_tp_rec_info.pbuf = (b_tp_pack_info_t *)sg_b_tp_rec_buf;
+#endif
 #else         
         gs_b_tp_rec_info.pbuf = (b_tp_pack_info_t *)malloc(pb_tp_head->total_len + B_TP_PACKET_HEAD_LEN + B_TP_CHECK_LEN);
         if(b_TP_NULL == gs_b_tp_rec_info.pbuf)

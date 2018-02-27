@@ -65,9 +65,15 @@ typedef signed int         b_TPS32;
 #define B_TP_MTU                  20
 
 #define B_TP_SEND_REPEAT          1
-
+#define B_TP_SEND_LOCK_ENABLE     0
 #define B_TP_STATIC_BUF_ENABLE    1
+
+#if B_TP_SEND_LOCK_ENABLE
 #define B_TP_STATIC_BUF_LEN       160
+#else
+#define B_TP_STATIC_BUF_LEN       160
+#define B_TP_STATIC_REC_BUF_LEN   64
+#endif
 /** configure end ---------------------------------------------*/
 
 #pragma pack(1)
