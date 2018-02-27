@@ -397,7 +397,7 @@ b_tp_err_code_t b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len)
 #endif
         return B_TP_CHECK_ERR;        
     }
-    for(icount = 0;icount < B_TP_SEND_REPEAT;i++)
+    for(icount = 0;icount < B_TP_SEND_REPEAT;icount++)
     {
         if((err_code = _b_tp_unpack_send(pb_tp_pack_info)) == B_TP_SUCCESS)
         {
