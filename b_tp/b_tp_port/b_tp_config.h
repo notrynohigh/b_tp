@@ -2,7 +2,7 @@
  ****************************************************************************
  * MIT License
  * @file b_tp_config.h  
- * @version v1.0.1
+ * @version v1.1.1
  * Copyright (c) [2018-2019] [Bean  email: notrynohigh@outlook.com]
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
