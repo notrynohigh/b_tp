@@ -118,6 +118,9 @@ static b_tp_err_code_t _b_tp_check_data(b_tp_pack_info_t *pb_tp_pack_info)
     {
         return B_TP_MEM_ERR;
     }
+#if B_TP_DEBUG_NO_CHECK		
+    return B_TP_SUCCESS;
+#endif		
     check_tmp = ((B_TP_CHECK_TYPE *)(&(pb_tp_pack_info->buf[pb_tp_pack_info->head.total_len])))[0];
 
 #if (B_TP_CHECK_SELECT == B_TP_SUM)
@@ -247,7 +250,7 @@ static b_tp_err_code_t _b_tp_wait_first_packet(b_TPU8 *pbuf, b_TPU32 len)
 {
     b_tp_head_t *pb_tp_head = (b_tp_head_t *)pbuf;
     b_tp_err_code_t err_code = B_TP_SUCCESS;
-    if(pb_tp_head->head != B_TP_HEAD || pb_tp_head->total_len <= B_TP_PACKET_HEAD_LEN)
+    if(pb_tp_head->head != B_TP_HEAD)
     {
         return B_TP_HEAD_ERR;
     }
@@ -297,7 +300,7 @@ static b_tp_err_code_t _b_tp_wait_first_packet(b_TPU8 *pbuf, b_TPU32 len)
 static b_tp_err_code_t _b_tp_unpack_send(b_tp_pack_info_t *pb_tp_pack_info)
 {
     b_tp_err_code_t err_code = B_TP_SUCCESS;
-    b_TPU32 len, send_len = 0;
+    b_TPU32 len, send_len = 0, len_tmp = 0;
     b_TPU8  *ptmp = (b_TPU8 *)pb_tp_pack_info;
     b_TPU8  frame_table[B_TP_MTU];
     B_TP_FRAME_NUMBER_TYPE frames = 0, i = 0;
@@ -306,16 +309,25 @@ static b_tp_err_code_t _b_tp_unpack_send(b_tp_pack_info_t *pb_tp_pack_info)
         return B_TP_PARAM_ERR;
     }
     len = pb_tp_pack_info->head.total_len + B_TP_PACKET_HEAD_LEN + B_TP_CHECK_LEN;
-    frames = 1 + (len - B_TP_MTU) / (B_TP_MTU - sizeof(B_TP_FRAME_NUMBER_TYPE));
+    if(len <= B_TP_MTU)
+    {
+    	  frames = 1;
+    }
+    else
+    {
+        frames = 1 + (len - B_TP_MTU) / (B_TP_MTU - sizeof(B_TP_FRAME_NUMBER_TYPE));
+    }
     for(i = 0;i < frames;i++)
     {
         if(i == 0)
         {
-            memcpy(frame_table, ptmp + send_len, B_TP_MTU);
-            send_len += B_TP_MTU;
+            len_tmp = (len <= B_TP_MTU) ? len : B_TP_MTU;
+            memcpy(frame_table, ptmp + send_len, len_tmp);
+            send_len += len_tmp;
         }
         else
         {
+            len_tmp = B_TP_MTU;
             ((B_TP_FRAME_NUMBER_TYPE *)frame_table)[0] = i + 1;
             memcpy(&(frame_table[sizeof(B_TP_FRAME_NUMBER_TYPE)]), ptmp + send_len, B_TP_MTU - sizeof(B_TP_FRAME_NUMBER_TYPE));
             send_len += B_TP_MTU - sizeof(B_TP_FRAME_NUMBER_TYPE);
@@ -324,7 +336,7 @@ static b_tp_err_code_t _b_tp_unpack_send(b_tp_pack_info_t *pb_tp_pack_info)
         {
             return B_TP_BUSY;
         }
-        err_code = b_tp_port_send(frame_table, B_TP_MTU);
+        err_code = b_tp_port_send(frame_table, len_tmp);
         if(err_code != B_TP_SUCCESS)
         {
             return err_code;
