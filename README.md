@@ -28,7 +28,8 @@ typedef struct
 > 校验：      校验方式可选，对协议头以及数据部分进行校验
 
 **使用接口说明**
-> 1、根据需求完成b_tp_config.h文件的配置
+
+> 1、根据需求完成b_tp_config.h文件的配置  
 > 2、如果在协议头加入了自定义项，实现一下两个函数来操作自定义的部分：
 
 ```
@@ -36,8 +37,8 @@ b_tp_err_code_t _b_tp_rec_check_head(b_tp_head_t *);
 void _b_tp_send_set_head(b_tp_head_t *);
 ```
 
-> 3、完成b_tp_port.c里发送函数
-> 4、收到数据后将收到的数据通过b_tp_receive_data函数提交给b_tp进行解析
->5、解析完成后调用回调，所以通过b_tp_reg_callback注册回调
+> 3、完成b_tp_port.c里数据发送<br>
+> 4、收到数据后将收到的数据通过b_tp_receive_data函数提交给b_tp进行解析<br>
+> 5、解析完成后调用回调，所以通过b_tp_reg_callback注册回调
 
 **如有建议或者疑问**： email： notrynohigh@outlook.com
