@@ -380,6 +380,10 @@ b_tp_err_code_t b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len)
     else if(gs_b_tp_rec_info.status == STA_PACKING)
     {
         err_code = _b_tp_collect_packet(pbuf, len);
+        if(err_code == B_TP_F_NUM_ERR)
+        {
+            err_code = _b_tp_wait_first_packet(pbuf, len);
+        }
     }
     return err_code;
 }
