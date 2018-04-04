@@ -202,7 +202,6 @@ static b_tp_err_code_t _b_tp_analyse_single_packet(b_TPU8 *pbuf, b_TPU32 len)
 static b_tp_err_code_t _b_tp_collect_packet(b_TPU8 *pbuf, b_TPU32 len)
 {
     b_tp_unpack_info_t *pb_tp_unpack_info = (b_tp_unpack_info_t *)pbuf;
-    b_TPU8 *p = b_TP_NULL;
     b_tp_err_code_t err_code = B_TP_SUCCESS;    
     if(pb_tp_unpack_info->number != (gs_b_tp_rec_info.c_packet_number + 1))
     {
@@ -219,6 +218,7 @@ static b_tp_err_code_t _b_tp_collect_packet(b_TPU8 *pbuf, b_TPU32 len)
 #if B_TP_STATIC_BUF_ENABLE
             gps_rec_success_cb(gs_b_tp_rec_info.pbuf->buf, gs_b_tp_rec_info.pbuf->head.total_len);
 #else
+            b_TPU8 *p = b_TP_NULL;
             p = malloc(gs_b_tp_rec_info.pbuf->head.total_len);
             if(p != b_TP_NULL)
             {
@@ -317,40 +317,53 @@ static b_tp_err_code_t _b_tp_unpack_send(b_tp_pack_info_t *pb_tp_pack_info)
     {
         frames = 1 + (len - B_TP_MTU) / (B_TP_MTU - sizeof(B_TP_FRAME_NUMBER_TYPE));
     }
-    for(i = 0;i < frames;i++)
+    for(i = 0;i < frames; )
     {
         if(i == 0)
         {
             len_tmp = (len <= B_TP_MTU) ? len : B_TP_MTU;
-            memcpy(frame_table, ptmp + send_len, len_tmp);
-            send_len += len_tmp;
+            memcpy(frame_table, ptmp + send_len, len_tmp);  
         }
         else
         {
             len_tmp = B_TP_MTU;
             ((B_TP_FRAME_NUMBER_TYPE *)frame_table)[0] = i + 1;
-            memcpy(&(frame_table[sizeof(B_TP_FRAME_NUMBER_TYPE)]), ptmp + send_len, B_TP_MTU - sizeof(B_TP_FRAME_NUMBER_TYPE));
-            send_len += B_TP_MTU - sizeof(B_TP_FRAME_NUMBER_TYPE);
+            memcpy(&(frame_table[sizeof(B_TP_FRAME_NUMBER_TYPE)]), ptmp + send_len, B_TP_MTU - sizeof(B_TP_FRAME_NUMBER_TYPE));      
         }
         if(B_TP_LOCK == _b_tp_send_get_lock())
         {
             return B_TP_BUSY;
         }
         err_code = b_tp_port_send(frame_table, len_tmp);
-        if(err_code != B_TP_SUCCESS)
+        if(err_code == B_TP_SUCCESS)
+        {
+            if(i == 0)
+            {
+                send_len += len_tmp;
+            }
+            else
+            {
+                send_len += B_TP_MTU - sizeof(B_TP_FRAME_NUMBER_TYPE);
+            }
+            i++;
+        }
+        else if(err_code != B_TP_BUSY)
         {
             return err_code;
         }
     }
     if(send_len < len)
     {
-        ((B_TP_FRAME_NUMBER_TYPE *)frame_table)[0] = i + 1;
-        memcpy(&(frame_table[sizeof(B_TP_FRAME_NUMBER_TYPE)]), ptmp + send_len, len - send_len);
-        if(B_TP_LOCK == _b_tp_send_get_lock())
+        do
         {
-            return B_TP_BUSY;
-        }        
-        err_code = b_tp_port_send(frame_table, len - send_len + sizeof(B_TP_FRAME_NUMBER_TYPE));
+            ((B_TP_FRAME_NUMBER_TYPE *)frame_table)[0] = i + 1;
+            memcpy(&(frame_table[sizeof(B_TP_FRAME_NUMBER_TYPE)]), ptmp + send_len, len - send_len);
+            if(B_TP_LOCK == _b_tp_send_get_lock())
+            {
+                return B_TP_BUSY;
+            }        
+            err_code = b_tp_port_send(frame_table, len - send_len + sizeof(B_TP_FRAME_NUMBER_TYPE));
+        }while(err_code == B_TP_BUSY);
     }
     return err_code;
 }
