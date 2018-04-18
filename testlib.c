@@ -14,6 +14,7 @@ uint8_t result[256];
 uint8_t result2[256];
 void main()
 {
+	char retval;
     uint8_t test_data[50];
     uint8_t i = 0;
 	uint32_t pi = 0;
@@ -51,7 +52,8 @@ void main()
 		b_len = lenlen;
         for(i = 0;i < (b_len / B_TP_MTU);i++)
         {
-            b_tp_rec(&(result[4 + i * B_TP_MTU]), B_TP_MTU, result2); 
+            retval = b_tp_rec(&(result[4 + i * B_TP_MTU]), B_TP_MTU, result2); 
+	printf("%d\n\r", retval);
 			lenlen = ((uint32_t *)result2)[0];
 			if(lenlen > 0)
 			{
@@ -64,7 +66,9 @@ void main()
         }
         if(b_len % B_TP_MTU)
         {
-            b_tp_rec(&(result[4 + i * B_TP_MTU]), b_len - (i * B_TP_MTU), &result2); 
+          retval =  b_tp_rec(&(result[4 + i * B_TP_MTU]), b_len - (i * B_TP_MTU), &result2); 
+
+	printf("%d\n\r", retval);
 			lenlen = ((uint32_t *)result2)[0];
 			if(lenlen > 0)
 			{

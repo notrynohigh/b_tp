@@ -80,7 +80,7 @@ static b_tp_err_code_t _b_tp_rec_check_head(b_tp_head_t *phead)
 
 static void _b_tp_send_set_head(b_tp_head_t *phead)
 {
-    phead->f_num = sg_head_count;
+    phead->number = sg_head_count;
 	sg_head_count++;
 	if(sg_head_count > 200)
 	{
