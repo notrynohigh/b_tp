@@ -1,7 +1,4 @@
 #include "b_tp.h"
-
-
-#include "b_tp.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "string.h"
@@ -13,14 +10,14 @@
 
 uint8_t  b_table[BUF_LEN];
 uint32_t b_len = 0;
-
+uint8_t result[256];
+uint8_t result2[256];
 void main()
 {
     uint8_t test_data[50];
     uint8_t i = 0;
 	uint32_t pi = 0;
-	b_tp_result_t result;
-	b_tp_result_t result2;
+	uint32_t lenlen = 0;
     for(i = 0;i < 50;i++)
     {
         test_data[i] = i;
@@ -34,43 +31,46 @@ void main()
         }
         memset(b_table, 0, BUF_LEN);
 	    b_len = 0;
-        b_tp_send_data(test_data, 50, &result);
-		if(result.len > 0)
+        b_tp_send(test_data, 50, result);
+		lenlen = ((uint32_t *)result)[0];
+		if(lenlen > 0)
 		{
-			for(pi = 0;pi < result.len;pi++)
+			for(pi = 0;pi < lenlen;pi++)
 		    {
-				if((pi % 10) == 0)
+				if((pi % 20) == 0)
 				{
 					printf("\n\r");
 				}					
-				printf("%d ", result.buf[pi]);
-
+				printf("%d ", result[pi + 4]);
+				
 			}
 			
 		}
-		printf("\\n\r------------------------------------------\n\r");
+		printf("\n\r------------------------------------------\n\r");
         i = 0;
-		b_len = result.len;
+		b_len = lenlen;
         for(i = 0;i < (b_len / B_TP_MTU);i++)
         {
-            b_tp_receive_data(&(result.buf[i * B_TP_MTU]), B_TP_MTU, &result2); 
-			if(result2.len > 0)
+            b_tp_rec(&(result[4 + i * B_TP_MTU]), B_TP_MTU, result2); 
+			lenlen = ((uint32_t *)result2)[0];
+			if(lenlen > 0)
 			{
-				for(pi = 0;pi < result2.len;pi++)
+				for(pi = 0;pi < lenlen;pi++)
 				{					
-					printf("%d ", result2.buf[pi]);
+					printf("%d ", result2[pi + 4]);
 
 				}
 			}
         }
         if(b_len % B_TP_MTU)
         {
-            b_tp_receive_data(&(result.buf[i * B_TP_MTU]), b_len - (i * B_TP_MTU), &result2); 
-			if(result2.len > 0)
+            b_tp_rec(&(result[4 + i * B_TP_MTU]), b_len - (i * B_TP_MTU), &result2); 
+			lenlen = ((uint32_t *)result2)[0];
+			if(lenlen > 0)
 			{
-				for(pi = 0;pi < result2.len;pi++)
+				for(pi = 0;pi < lenlen;pi++)
 				{					
-					printf("%d ", result2.buf[pi]);
+					printf("%d ", result2[pi + 4]);
 
 				}
 			}
@@ -78,5 +78,6 @@ void main()
         sleep(1);
     }
 }
+
 
 

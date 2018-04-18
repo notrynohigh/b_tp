@@ -67,6 +67,7 @@ static b_TPU8 sg_head_count = 0;
 static b_tp_err_code_t _b_tp_rec_check_head(b_tp_head_t *phead)
 {
 	b_TPU8 tmp = (sg_head_count == 0) ? 200 : (sg_head_count - 1);
+	return 0;
 	if(phead->f_num == tmp)
 	{
 		return B_TP_SUCCESS;
@@ -323,7 +324,7 @@ static b_tp_err_code_t _b_tp_unpack_send(b_tp_pack_info_t *pb_tp_pack_info, b_tp
  * @{
  */
 
-b_tp_err_code_t b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len, b_tp_result_t *presult)
+static b_tp_err_code_t b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len, b_tp_result_t *presult)
 {
     b_tp_err_code_t err_code = B_TP_SUCCESS;
     if(pbuf == b_TP_NULL || len == 0 || b_TP_NULL == presult)
@@ -347,7 +348,7 @@ b_tp_err_code_t b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len, b_tp_result_t *pres
 }
 
 
-b_tp_err_code_t b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len, b_tp_result_t *presult)
+static b_tp_err_code_t b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len, b_tp_result_t *presult)
 {
     b_tp_err_code_t err_code = B_TP_SUCCESS;
     b_tp_pack_info_t *pb_tp_pack_info = b_TP_NULL;
@@ -383,6 +384,33 @@ b_tp_err_code_t b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len, b_tp_result_t *presult
     }
     return err_code;
 }
+
+
+b_TPU8 b_tp_rec(b_TPU8 buf[], b_TPU32 len, b_TPU8 result[])
+{
+	b_tp_result_t *presult = (b_tp_result_t *)result;
+	if(B_TP_SUCCESS == b_tp_receive_data(buf, len, presult))
+    {
+		if(presult->len > 0)
+			return 0;
+	}
+	return 1;
+}
+
+b_TPU8 b_tp_send(b_TPU8 buf[], b_TPU32 len, b_TPU8 result[])
+{
+	b_tp_result_t *presult = (b_tp_result_t *)result;
+	if(B_TP_SUCCESS == b_tp_send_data(buf, len, presult))
+    {
+		if(presult->len > 0)
+			return 0;
+	}
+	return 1;	
+}
+
+
+
+
 
 
 /**

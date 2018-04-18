@@ -150,8 +150,8 @@ typedef struct
  * @{
  */
 
-b_tp_err_code_t b_tp_receive_data(b_TPU8 *pbuf, b_TPU32 len, b_tp_result_t *presult);
-b_tp_err_code_t b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len, b_tp_result_t *presult);
+b_TPU8 b_tp_rec(b_TPU8 buf[], b_TPU32 len, b_TPU8 result[]);
+b_TPU8 b_tp_send(b_TPU8 buf[], b_TPU32 len, b_TPU8 result[]);
 
 /**
  * @}
