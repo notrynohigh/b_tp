@@ -26,6 +26,9 @@
 
 #include "stdint.h"
 #include "b_tp.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**
  * @addtogroup B_TP
  * @{
@@ -49,6 +52,9 @@ b_tp_err_code_t b_tp_port_send(uint8_t *pbuf, uint32_t len);
  * @}
  */
 
+#ifdef __cplusplus
+}
+#endif
 #endif
 
 

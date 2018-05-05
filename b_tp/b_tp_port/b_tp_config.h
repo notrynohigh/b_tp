@@ -23,6 +23,9 @@
  */
 #ifndef __B_TP_CONFIG_H__
 #define __B_TP_CONFIG_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @addtogroup B_TP
@@ -100,4 +103,7 @@ typedef struct
  */
 
 
+#ifdef __cplusplus
+}
+#endif
 #endif

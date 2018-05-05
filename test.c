@@ -43,7 +43,7 @@ void _b_tp_send_set_head(b_tp_head_t *phead)
     phead->number = number++;
 }
 
-void main()
+int main()
 {
     uint8_t test_data[50];
     uint8_t i = 0;
@@ -73,6 +73,7 @@ void main()
         }
         sleep(1);
     }
+	return 0;
 }
 
 

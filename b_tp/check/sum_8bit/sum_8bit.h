@@ -5,6 +5,9 @@
 #include "stdint.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 
@@ -12,6 +15,9 @@
 uint8_t sum_8bit(uint8_t *pbuf, uint32_t len);
 
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
