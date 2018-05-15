@@ -2,7 +2,7 @@
  ****************************************************************************
  * MIT License
  * @file b_tp_config.h  
- * @version v1.1.1
+ * @version v2.0.1
  * Copyright (c) [2018-2019] [Bean  email: notrynohigh@outlook.com]
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,16 +67,7 @@ typedef signed int         b_TPS32;
 #define B_TP_HEAD                 0XA5
 #define B_TP_MTU                  20
 
-#define B_TP_SEND_REPEAT          1
-#define B_TP_SEND_LOCK_ENABLE     1
-#define B_TP_STATIC_BUF_ENABLE    1
-
-#if B_TP_SEND_LOCK_ENABLE
 #define B_TP_STATIC_BUF_LEN       160
-#else
-#define B_TP_STATIC_BUF_LEN       160
-#define B_TP_STATIC_REC_BUF_LEN   64
-#endif
 
 #define B_TP_DEBUG_NO_CHECK       0
 /** configure end ---------------------------------------------*/

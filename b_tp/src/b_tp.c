@@ -2,7 +2,7 @@
  ****************************************************************************
  * MIT License
  * @file b_tp.c  
- * @version v1.1.1
+ * @version v2.0.1
  * Copyright (c) [2018-2019] [Bean  email: notrynohigh@outlook.com]
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,23 +40,16 @@
 #define WEAK_FUNC    __attribute__((weak))
 #endif
 
-#if B_TP_STATIC_BUF_ENABLE
+
 static b_TPU8 sg_b_tp_buf[B_TP_STATIC_BUF_LEN];
 
-#ifdef B_TP_STATIC_REC_BUF_LEN
-static b_TPU8 sg_b_tp_rec_buf[B_TP_STATIC_REC_BUF_LEN];
-#endif
-
-#endif
-
-typedef enum
+typedef enum 
 {
-    B_TP_UNLOCK,
-    B_TP_LOCK
+	B_TP_LOCK,
+	B_TP_UNLOCK
 }b_tp_lock_t;
 
-static b_tp_lock_t sg_send_lock_flag = B_TP_UNLOCK;
-
+static b_tp_lock_t sg_lock_flag = B_TP_UNLOCK;
 /**
  * @addtogroup B_TP
  * @{
@@ -94,19 +87,17 @@ WEAK_FUNC void _b_tp_send_set_head(b_tp_head_t *phead)
 
 static void _b_tp_send_lock()
 {
-#if B_TP_SEND_LOCK_ENABLE
-    sg_send_lock_flag = B_TP_LOCK;
-#endif
+    sg_lock_flag = B_TP_LOCK;
 }
 
 static void _b_tp_send_unlock()
 {
-    sg_send_lock_flag = B_TP_UNLOCK;
+    sg_lock_flag = B_TP_UNLOCK;
 }
 
 static b_tp_lock_t _b_tp_send_get_lock()
 {
-    return sg_send_lock_flag;
+    return sg_lock_flag;
 }
  
 static b_tp_err_code_t _b_tp_check_data(b_tp_pack_info_t *pb_tp_pack_info)
@@ -162,12 +153,7 @@ static void _b_tp_rec_reset()
     gs_b_tp_rec_info.status = STA_WAIT_HEAD;
     if(gs_b_tp_rec_info.pbuf != b_TP_NULL)
     {
-#if B_TP_STATIC_BUF_ENABLE
-
-#else
-        free(gs_b_tp_rec_info.pbuf);
-        gs_b_tp_rec_info.pbuf = b_TP_NULL;
-#endif        
+       
     }
     _b_tp_send_unlock();
 }
@@ -181,19 +167,7 @@ static b_tp_err_code_t _b_tp_analyse_single_packet(b_TPU8 *pbuf, b_TPU32 len)
     {
         return B_TP_CHECK_ERR;
     }
-#if B_TP_STATIC_BUF_ENABLE
-#if B_TP_SEND_LOCK_ENABLE
-        p = sg_b_tp_buf;
-#else
-        p = sg_b_tp_rec_buf;
-#endif 
-#else   
-    p = malloc(pb_tp_pack_info->head.total_len);
-    if(b_TP_NULL == p)
-    {
-        return B_TP_MEM_ERR;
-    }
-#endif
+    p = sg_b_tp_buf;
     memcpy(p, pb_tp_pack_info->buf, pb_tp_pack_info->head.total_len);
     gps_rec_success_cb(p, pb_tp_pack_info->head.total_len);
     return err_code;
@@ -215,21 +189,7 @@ static b_tp_err_code_t _b_tp_collect_packet(b_TPU8 *pbuf, b_TPU32 len)
     {
         if(B_TP_SUCCESS == _b_tp_check_data(gs_b_tp_rec_info.pbuf))
         {
-#if B_TP_STATIC_BUF_ENABLE
-            gps_rec_success_cb(gs_b_tp_rec_info.pbuf->buf, gs_b_tp_rec_info.pbuf->head.total_len);
-#else
-            b_TPU8 *p = b_TP_NULL;
-            p = malloc(gs_b_tp_rec_info.pbuf->head.total_len);
-            if(p != b_TP_NULL)
-            {
-                memcpy(p, gs_b_tp_rec_info.pbuf->buf, gs_b_tp_rec_info.pbuf->head.total_len);
-                gps_rec_success_cb(p, gs_b_tp_rec_info.pbuf->head.total_len);
-            }
-            else
-            {
-                err_code = B_TP_MEM_ERR;
-            }
-#endif            
+            gps_rec_success_cb(gs_b_tp_rec_info.pbuf->buf, gs_b_tp_rec_info.pbuf->head.total_len);          
         }
         else
         {
@@ -250,7 +210,8 @@ static b_tp_err_code_t _b_tp_wait_first_packet(b_TPU8 *pbuf, b_TPU32 len)
 {
     b_tp_head_t *pb_tp_head = (b_tp_head_t *)pbuf;
     b_tp_err_code_t err_code = B_TP_SUCCESS;
-    if(pb_tp_head->head != B_TP_HEAD)
+	
+    if(pb_tp_head->head != B_TP_HEAD || len < B_TP_PACKET_HEAD_LEN)
     {
         return B_TP_HEAD_ERR;
     }
@@ -267,20 +228,7 @@ static b_tp_err_code_t _b_tp_wait_first_packet(b_TPU8 *pbuf, b_TPU32 len)
     if(pb_tp_head->f_num == 0x1)
     {  
         gs_b_tp_rec_info.total_len = pb_tp_head->total_len + B_TP_CHECK_LEN;
-#if B_TP_STATIC_BUF_ENABLE
-#if B_TP_SEND_LOCK_ENABLE
         gs_b_tp_rec_info.pbuf = (b_tp_pack_info_t *)sg_b_tp_buf;
-#else
-        gs_b_tp_rec_info.pbuf = (b_tp_pack_info_t *)sg_b_tp_rec_buf;
-#endif
-#else         
-        gs_b_tp_rec_info.pbuf = (b_tp_pack_info_t *)malloc(pb_tp_head->total_len + B_TP_PACKET_HEAD_LEN + B_TP_CHECK_LEN);
-        if(b_TP_NULL == gs_b_tp_rec_info.pbuf)
-        {
-            _b_tp_send_unlock();
-            return B_TP_MEM_ERR;
-        }
-#endif
         memcpy(&(gs_b_tp_rec_info.pbuf->head), pbuf, B_TP_PACKET_HEAD_LEN);
         memcpy(gs_b_tp_rec_info.pbuf->buf, pbuf + B_TP_PACKET_HEAD_LEN, len - B_TP_PACKET_HEAD_LEN);
         gs_b_tp_rec_info.status = STA_PACKING;
@@ -406,20 +354,11 @@ b_tp_err_code_t b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len)
 {
     b_tp_err_code_t err_code = B_TP_SUCCESS;
     b_tp_pack_info_t *pb_tp_pack_info = b_TP_NULL;
-    b_TPU8 icount = 0;
     if(pbuf == b_TP_NULL || len == 0 || B_TP_LOCK == _b_tp_send_get_lock())
     {
         return B_TP_PARAM_ERR;
     }
-#if B_TP_STATIC_BUF_ENABLE
     pb_tp_pack_info = (b_tp_pack_info_t *)sg_b_tp_buf;
-#else
-    pb_tp_pack_info = (b_tp_pack_info_t *)malloc(len + B_TP_CHECK_LEN + B_TP_PACKET_HEAD_LEN);
-    if(pb_tp_pack_info == b_TP_NULL)
-    {
-        return B_TP_MEM_ERR;
-    }
-#endif    
     _b_tp_send_set_head(&(pb_tp_pack_info->head));
     pb_tp_pack_info->head.head = B_TP_HEAD;
     pb_tp_pack_info->head.total_len = len;	
@@ -434,25 +373,9 @@ b_tp_err_code_t b_tp_send_data(b_TPU8 *pbuf, b_TPU32 len)
     memcpy(pb_tp_pack_info->buf, pbuf, len);
     if(B_TP_SUCCESS != _b_tp_create_check_code(pb_tp_pack_info))
     {
-#if B_TP_STATIC_BUF_ENABLE  
-
-#else
-        free(pb_tp_pack_info);
-#endif
         return B_TP_CHECK_ERR;        
     }
-    for(icount = 0;icount < B_TP_SEND_REPEAT;icount++)
-    {
-        if((err_code = _b_tp_unpack_send(pb_tp_pack_info)) == B_TP_SUCCESS)
-        {
-            break;
-        }
-    }
-#if B_TP_STATIC_BUF_ENABLE 
-
-#else
-    free(pb_tp_pack_info);
-#endif
+    _b_tp_unpack_send(pb_tp_pack_info);
     return err_code;
 }
 

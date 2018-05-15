@@ -22,11 +22,6 @@ void command_handle(uint8_t *pbuf, uint32_t len)
         printf("%d ", pbuf[i]);
     }
     printf("\n\r\n\r");
-#if B_TP_STATIC_BUF_ENABLE
-
-#else
-    free(pbuf);
-#endif
 }
 
 b_tp_err_code_t _b_tp_rec_check_head(b_tp_head_t *phead)
